@@ -590,11 +590,15 @@ class ShowClnsNeighborsDetail(ShowClnsNeighborsDetailSchema):
 
     exclude = ['holdtime', 'uptime', 'chars_in', 'chars_out', 'pkts_in', 'pkts_out']
 
+    
+
     def cli(self,output=None):
         if output is None:
             out = self.device.execute(self.cli_command)
         else:
             out = output
+        
+        default = True
 
         # initial return dictionary
         result_dict = {}
@@ -632,6 +636,7 @@ class ShowClnsNeighborsDetail(ShowClnsNeighborsDetailSchema):
                 group = m.groupdict()
                 clns_dict = result_dict.setdefault('tag', {})\
                                        .setdefault(group['tag'], {})
+                default = False
                 continue
             # System Id       Interface     SNPA                State  Holdtime  Type Protocol
             # R7              Gi4           5e00.c0ff.060d      Up     26        L2   M-ISIS
@@ -639,7 +644,8 @@ class ShowClnsNeighborsDetail(ShowClnsNeighborsDetailSchema):
             if m:
                 group = m.groupdict()
                 type_1 = group['level']
-
+                if default:
+                    tag = 'default'
                 if 'tag' not in result_dict:
                     clns_dict = result_dict.setdefault('tag', {})\
                                           .setdefault("", {})
@@ -1006,6 +1012,7 @@ class ShowClnsTraffic(ShowClnsTrafficSchema):
 
         # initial return dictionary
         result_dict = {}
+        default = True
 
         # CLNS:  Time since last clear: never
         p1 = re.compile(r'^CLNS:  +Time +since +last +clear: (?P<last_clear>\w+)$')
@@ -1270,11 +1277,14 @@ class ShowClnsTraffic(ShowClnsTrafficSchema):
             if m:
                 group = m.groupdict()
                 isis_dict = result_dict.setdefault('tag',{}).setdefault(group['tag'], {}).setdefault('IS-IS', {})
+                default = False
                 continue
 
             #     IS-IS: Time since last clear: never
             m = p21.match(line)
             if m:
+                if default:
+                    isis_dict = result_dict.setdefault('tag',{}).setdefault('default', {}).setdefault('IS-IS', {})
                 group = m.groupdict()
                 isis_dict.update({'last_clear': group['last_clear']})
                 continue

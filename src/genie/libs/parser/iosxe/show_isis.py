@@ -206,6 +206,7 @@ class ShowIsisLspLog(ShowIsisLspLogSchema):
 
     cli_command = 'show isis lsp-log'
     exclude = ['when']
+    
 
     def cli(self, output=None):
         if output is None:
@@ -213,6 +214,8 @@ class ShowIsisLspLog(ShowIsisLspLogSchema):
         else:
             out = output
 
+        default = True
+        
         # initial return dictionary
         result_dict = {}
 
@@ -233,8 +236,8 @@ class ShowIsisLspLog(ShowIsisLspLogSchema):
             if m:
                 group = m.groupdict()
                 tag = group['tag']
-                continue
-
+                default = False
+       
             #  Level 1 LSP log
             m = p2.match(line)
             if m:
@@ -248,6 +251,8 @@ class ShowIsisLspLog(ShowIsisLspLogSchema):
             # 00:25:46        2         GigabitEthernet4   NEWADJ DIS
             m = p3.match(line)
             if m:
+                if default:
+                    tag = 'default'
                 group = m.groupdict()
                 tag_dict = result_dict.setdefault('tag', {}).\
                                         setdefault(tag, {}).\
