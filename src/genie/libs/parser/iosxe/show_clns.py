@@ -597,7 +597,7 @@ class ShowClnsNeighborsDetail(ShowClnsNeighborsDetailSchema):
             out = self.device.execute(self.cli_command)
         else:
             out = output
-        
+
         default = True
 
         # initial return dictionary
